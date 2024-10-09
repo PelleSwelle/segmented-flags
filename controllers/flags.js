@@ -1,8 +1,12 @@
 const Flag = require('../models/flag')
 
 const getAllFlags = async (req, res) => {
-  const allFlags = await Flag.find({});
-  return allFlags;
+  let allFlags = await Flag.find()
+  if (allFlags) {
+    return res.json(allFlags)
+  } else {
+    return res.json({message: 'could not get all flags'});
+  }
 };
 
 const newFlag = async (req, res, next) => {
@@ -24,23 +28,36 @@ const newFlag = async (req, res, next) => {
     })
   
     // save object to database
-    newFlag.save().then((err, data) => {
-      if (err) {
-        return res.json({Error: err});
-      } 
-      return res.json(data);
-    })
+    let success = await newFlag.save()
+    if (!success) {
+      return res.json({Error: res.Error});
+    } else {
+      return res.json(newFlag);
+    }
   } else {
       return res.json({message: 'Flag already exists ' + duplicate})
   }
 };
 
-const deleteAllFlags = (req, res, next) => {
-  res.json({message: "DELETE all flags"});
+const deleteAllFlags = async (req, res, next) => {
+  let success = await Flag.deleteMany({})
+  if (success) {
+    return res.json({message: 'complete delete successful'})
+  } else {
+    return res.json({message: 'complete delete failed'})
+  }
 };
 
-const getOneFlag = (req, res, next) => {
-  res.json({message: "GET 1 flag"});
+const getOneFlag = async (req, res, next) => {
+  let countryName = req.params.countryName;
+
+  let flag = Flag.findOne({countryName: countryName})
+
+  if (!flag) {
+    return res.json({message: 'could not find flag'})
+  } else {
+    return res.json(flag)
+  }
 };
 
 const newComment = (req, res, next) => {
